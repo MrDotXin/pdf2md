@@ -873,7 +873,7 @@ def elements_to_markdown(elements, md_path="output.md", image_dir="images"):
 - `Chunker`: 对上一个节点的结果进行分块，支持按`title` `page` `character` `similarity`
 - `Embed`:  一般跟在Chunker 后面， 对结果进行向量嵌入可以无缝衔接项链数据库源进行输出
 
-![image-20251117225900016](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20251117225900016.png)
+![image-20251117225900016](image-20251117225900016.png)
 
 
 
