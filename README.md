@@ -865,7 +865,7 @@ def elements_to_markdown(elements, md_path="output.md", image_dir="images"):
 
 - ✔ 3. **自托管服务器 / unstructured-ingest / pipeline API 调用**
 支持的工作流节点
-
+ 
 - `Source` ：source节点，指定了文档源(可以是`File`, `三方数据源(比如企业数据库)`)
 - `Destination`:  target节点，指定了文档输出源(可以是各种三方服务, 也可以是`企业数据库, 向量数据库`)
 - `Partitioner` :  对文档进行语义分割，元素拆解
