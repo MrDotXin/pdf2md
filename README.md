@@ -16,7 +16,7 @@ https://docs.textin.com/xparse/parse-quickstart
 
 ### 计费方式
 
-<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20251118172651189.png" alt="image-20251118172651189" style="zoom:25%;" />
+<img src="image-20251118172651189.png" alt="image-20251118172651189" style="zoom:25%;" />
 
 
 
@@ -53,11 +53,11 @@ https://docs.textin.com/xparse/parse-max-workers
 
 ### 计费方式
 
-<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20251117132917704.png" alt="image-20251117132917704" style="zoom:50%;" />
+<img src="image-20251117132917704.png" alt="image-20251117132917704" style="zoom:50%;" />
 
 细节
 
-![image-20251117133125044](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20251117133125044.png)
+![image-20251117133125044](image-20251117133125044.png)
 
 使用方法：
 
@@ -127,7 +127,7 @@ client.convert(pdf_path,
 
 ### Mistral AI OCR定价
 
-<img src="E:\Book\实用API\PDFToMd\image-20251118203652345.png" alt="image-20251118203652345" style="zoom:50%;" />
+<img src="image-20251118203652345.png" alt="image-20251118203652345" style="zoom:50%;" />
 
 ### 使用
 
@@ -409,7 +409,7 @@ https://noedgeai.github.io/pdfdeal-docs
 
 ### 定价
 
-![image-20251118235217951](E:\Book\实用API\PDFToMd\image-20251118235217951.png)
+![image-20251118235217951](image-20251118235217951.png)
 
 ### 使用
 
@@ -435,7 +435,7 @@ PDF路径
 
 会将`images` + `md`结果生成到指定文件夹
 
-<img src="E:\Book\实用API\PDFToMd\image-20251119000355978.png" alt="image-20251119000355978" style="zoom:33%;" />
+<img src="image-20251119000355978.png" alt="image-20251119000355978" style="zoom:33%;" />
 
 ### 不足
 
@@ -451,7 +451,7 @@ PDF路径
 
 ### 定价
 
-<img src="E:\Book\实用API\PDFToMd\image-20251119000729618.png" alt="image-20251119000729618" style="zoom:33%;" />
+<img src="image-20251119000729618.png" alt="image-20251119000729618" style="zoom:33%;" />
 
 异步执行任务
 
@@ -516,7 +516,7 @@ pathlib.Path("output-pymudpdf4llm.md").write_bytes(md_text.encode())
 
 The maximum PDF file size supported is 1 GB.
 
-<img src="E:\Book\实用API\PDFToMd\image-20251119013143806.png" alt="image-20251119013143806" style="zoom:33%;" />
+<img src="image-20251119013143806.png" alt="image-20251119013143806" style="zoom:33%;" />
 
 ### 使用
 
