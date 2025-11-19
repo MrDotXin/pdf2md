@@ -6,5 +6,8 @@ from src.tools import doc2x
 from src.tools import light
 from src.tools import docling
 from src.tools import pymulpdf
+from src.tools import paddleOCR
 
-docling.convert('./ReAct.pdf', './tmp/docling/ReAct.md')
+
+
+paddleOCR.convert('./ReAct.pdf', './tmp/paddleOCR/')

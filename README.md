@@ -1,6 +1,18 @@
 # PDF 转化Markdow 工具方案调研情况
 
 - [PDF 转化Markdow 工具方案调研情况](#pdf-转化markdow-工具方案调研情况)
+  - [腾讯云文档解析](#腾讯云文档解析)
+    - [使用](#使用)
+    - [输入](#输入)
+    - [输出](#输出)
+  - [阿里云文档解析](#阿里云文档解析)
+    - [计费](#计费)
+    - [使用](#使用-1)
+    - [输入](#输入-1)
+    - [输出](#输出-1)
+  - [小红书 dots.ocr](#小红书-dotsocr)
+  - [paddle-ocr](#paddle-ocr)
+    - [远程部署](#远程部署)
   - [Textin](#textin)
     - [计费方式](#计费方式)
     - [图片元素](#图片元素)
@@ -9,49 +21,49 @@
   - [Zamzar API](#zamzar-api)
     - [计费方式](#计费方式-1)
     - [安装Python SDK](#安装python-sdk)
-    - [使用](#使用)
-      - [输入](#输入)
-      - [输出](#输出)
+    - [使用](#使用-2)
+      - [输入](#输入-2)
+      - [输出](#输出-2)
     - [不足](#不足)
   - [mistral-ocr(开源社区工具, 对PDF还原度较高)](#mistral-ocr开源社区工具-对pdf还原度较高)
     - [功能特点](#功能特点)
     - [Mistral AI OCR定价](#mistral-ai-ocr定价)
-    - [使用](#使用-1)
-      - [输入](#输入-1)
-      - [输出](#输出-1)
+    - [使用](#使用-3)
+      - [输入](#输入-3)
+      - [输出](#输出-3)
   - [MinerU API](#mineru-api)
     - [limits](#limits)
-    - [使用](#使用-2)
+    - [使用](#使用-4)
       - [首先提交任务](#首先提交任务)
       - [轮询状态](#轮询状态)
     - [获取结果](#获取结果)
-      - [输入](#输入-2)
-      - [输出](#输出-2)
+      - [输入](#输入-4)
+      - [输出](#输出-4)
   - [Marker](#marker)
     - [支持本地部署](#支持本地部署)
-    - [使用](#使用-3)
-    - [输入](#输入-3)
-    - [输出](#输出-3)
+    - [使用](#使用-5)
+    - [输入](#输入-5)
+    - [输出](#输出-5)
     - [本地部署](#本地部署)
   - [Docling(本地)](#docling本地)
   - [Doc2x](#doc2x)
     - [定价](#定价)
-    - [使用](#使用-4)
-      - [输入](#输入-4)
-      - [输出](#输出-4)
+    - [使用](#使用-6)
+      - [输入](#输入-6)
+      - [输出](#输出-6)
     - [不足](#不足-1)
   - [Lightpdf](#lightpdf)
     - [定价](#定价-1)
-    - [使用](#使用-5)
-    - [输入](#输入-5)
-    - [输入](#输入-6)
+    - [使用](#使用-7)
+    - [输入](#输入-7)
+    - [输入](#输入-8)
     - [不足](#不足-2)
   - [PyMuPDF(本地)](#pymupdf本地)
   - [Pandoc](#pandoc)
   - [mathpix](#mathpix)
-    - [使用](#使用-6)
-    - [输入](#输入-7)
-    - [输出](#输出-5)
+    - [使用](#使用-8)
+    - [输入](#输入-9)
+    - [输出](#输出-7)
   - [Unstructured.io](#unstructuredio)
     - [SDK 对文档进行按元素拆解获取结果(sync)](#sdk-对文档进行按元素拆解获取结果sync)
     - [支持自定义工作流](#支持自定义工作流)
@@ -60,6 +72,231 @@
   - [notegpt(Web Server Only)](#notegptweb-server-only)
   - [pdf2md(Web Server Only)](#pdf2mdweb-server-only)
   - [FlashAI(Application Only)](#flashaiapplication-only)
+
+![图片](ba5f427182ee17562d12e94c0593026c.png)
+
+## 腾讯云文档解析
+
+需要开通资源包
+
+也是异步轮询
+
+
+
+### 使用
+
+上传本地文件会有大小限制
+
+```
+文件的 Base64 值。
+支持的文件类型： PNG、JPG、JPEG、PDF、GIF、BMP、TIFF
+支持的文件大小：所下载文件经Base64编码后不超过 8M。文件下载时间不超过 3 秒。
+支持的图片像素：单边介于20-10000px之间。
+文件的 FileUrl、FileBase64 必须提供一个，如果都提供，只使用 FileUrl。上传文件及手填两种方式只能选择其一，如果两者均提供，取值顺序为文件>手填值
+```
+
+```python
+# -*- coding: utf-8 -*-
+
+import sys
+import os
+from dotenv import load_dotenv
+load_dotenv(".env", override=True)
+
+import base64
+import json
+import types
+from tencentcloud.common import credential
+from tencentcloud.common.profile.client_profile import ClientProfile
+from tencentcloud.common.profile.http_profile import HttpProfile
+from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
+from tencentcloud.lkeap.v20240522 import lkeap_client, models
+
+
+def submit():
+    try:
+        # 密钥信息从环境变量读取，需要提前在环境变量中设置 TENCENTCLOUD_SECRET_ID 和 TENCENTCLOUD_SECRET_KEY
+        # 使用环境变量方式可以避免密钥硬编码在代码中，提高安全性
+        # 生产环境建议使用更安全的密钥管理方案，如密钥管理系统(KMS)、容器密钥注入等
+        # 请参见：https://cloud.tencent.com/document/product/1278/85305
+        # 密钥可前往官网控制台 https://console.cloud.tencent.com/cam/capi 进行获取
+        cred = credential.Credential(os.getenv("TENCENTCLOUD_SECRET_ID"), os.getenv("TENCENTCLOUD_SECRET_KEY"))
+        # 使用临时密钥示例
+        # cred = credential.Credential("SecretId", "SecretKey", "Token")
+        # 实例化一个http选项，可选的，没有特殊需求可以跳过
+        httpProfile = HttpProfile()
+        httpProfile.endpoint = "lkeap.tencentcloudapi.com"
+
+        # 实例化一个client选项，可选的，没有特殊需求可以跳过
+        clientProfile = ClientProfile()
+        clientProfile.httpProfile = httpProfile
+        # 实例化要请求产品的client对象,clientProfile是可选的
+        client = lkeap_client.LkeapClient(cred, "ap-guangzhou", clientProfile)
+
+        # 读取文件并转换为 base64 字符串
+        with open('./ReAct.pdf', 'rb') as file:
+            file_data = file.read()
+            file_base64 = base64.b64encode(file_data).decode('utf-8')
+        
+        # 实例化一个请求对象,每个接口都会对应一个request对象
+        req = models.CreateReconstructDocumentFlowRequest()
+        params = {
+            "FileBase64": file_base64,
+            "FileType": "pdf",
+            "Config": {
+                "TableResultType": "0",
+                "ResultType": "3",
+            }
+        }
+        
+        req.from_json_string(json.dumps(params))
+
+        # 返回的resp是一个CreateReconstructDocumentFlowResponse的实例，与请求对象对应
+        resp = client.CreateReconstructDocumentFlow(req)
+        # 输出json格式的字符串回包
+        print(resp.to_json_string())
+
+    except TencentCloudSDKException as err:
+        print(err)
+
+
+def query(taskId : str):
+    try:
+        # 密钥信息从环境变量读取，需要提前在环境变量中设置 TENCENTCLOUD_SECRET_ID 和 TENCENTCLOUD_SECRET_KEY
+        # 使用环境变量方式可以避免密钥硬编码在代码中，提高安全性
+        # 生产环境建议使用更安全的密钥管理方案，如密钥管理系统(KMS)、容器密钥注入等
+        # 请参见：https://cloud.tencent.com/document/product/1278/85305
+        # 密钥可前往官网控制台 https://console.cloud.tencent.com/cam/capi 进行获取
+        cred = credential.Credential(os.getenv("TENCENTCLOUD_SECRET_ID"), os.getenv("TENCENTCLOUD_SECRET_KEY"))
+        # 使用临时密钥示例
+        # cred = credential.Credential("SecretId", "SecretKey", "Token")
+        # 实例化一个http选项，可选的，没有特殊需求可以跳过
+        httpProfile = HttpProfile()
+        httpProfile.endpoint = "lkeap.tencentcloudapi.com"
+
+        # 实例化一个client选项，可选的，没有特殊需求可以跳过
+        clientProfile = ClientProfile()
+        clientProfile.httpProfile = httpProfile
+        # 实例化要请求产品的client对象,clientProfile是可选的
+        client = lkeap_client.LkeapClient(cred, "ap-guangzhou", clientProfile)
+
+        # 实例化一个请求对象,每个接口都会对应一个request对象
+        req = models.GetReconstructDocumentResultRequest()
+        params = {
+            "TaskId": taskId
+        }
+        req.from_json_string(json.dumps(params))
+
+        # 返回的resp是一个GetReconstructDocumentResultResponse的实例，与请求对象对应
+        resp = client.GetReconstructDocumentResult(req)
+        # 输出json格式的字符串回包
+        print(resp.to_json_string())
+
+    except TencentCloudSDKException as err:
+        print(err)
+        
+if __name__ == '__main__':
+    query("2e4b86761763534470288")
+```
+
+
+
+### 输入
+
+[输入配置](https://console.cloud.tencent.com/api/explorer?Product=lkeap&Version=2024-05-22&Action=GetReconstructDocumentResult)
+
+### 输出
+
+如果成功，会返回下载链接，是一个包含md文件和图片资源的的`zip`
+
+## 阿里云文档解析
+
+要开通阿里云文档解析服务`docmind`
+
+[文档解析](https://help.aliyun.com/zh/document-mind/developer-reference/document-parsing-large-model-version?spm=5176.26934562.main.1.4ec11c0fvY0SLZ)
+
+采用异步轮询
+
+### 计费
+
+<img src="image-20251119134744173.png" alt="image-20251119134744173" style="zoom:25%;" />
+
+
+
+### 使用
+
+```python
+
+def submit(): 
+    client = create_client()
+    request = docmind_api20220711_models.SubmitDocStructureJobAdvanceRequest(
+        # file_url_object : 本地文件流
+        file_url_object=open("./ReAct.pdf", "rb"),
+        # file_name_extension : 文件后缀格式。与文件名二选一
+        file_name_extension='pdf'
+    )
+    runtime = util_models.RuntimeOptions()
+    try:
+        # 复制代码运行请自行打印 API 的返回值
+        response = client.submit_doc_structure_job_advance(request, runtime)
+
+        print(response.body)       
+    except Exception as error:
+        # 如有需要，请打印 error
+        UtilClient.assert_as_string(error.message)
+
+def query() :
+    client = create_client()
+    request = docmind_api20220711_models.GetDocStructureResultRequest(
+        # id :  任务提交接口返回的id
+        id='docmind-20251119-8f55721f9de34a04b3a7fd8c0b98e42e'
+    )
+    try:
+        # 复制代码运行请自行打印 API 的返回值
+        response = client.get_doc_structure_result(request)
+        # API返回值格式层级为 body -> data -> 具体属性。可根据业务需要打印相应的结果。获取属性值均以小写开头
+        # 获取异步任务处理情况,可根据response.body.completed判断是否需要继续轮询结果
+        # 获取返回结果。建议先把response.body.data转成json，然后再从json里面取具体需要的值。
+        print(json.dumps(response.body.data))        
+    except Exception as error:
+        # 如有需要，请打印 error
+        UtilClient.assert_as_string(error.message)
+        
+```
+
+
+
+### 输入
+
+文档
+
+### 输出
+
+失败状态或者详细的文档解析结果(json)
+
+## 小红书 dots.ocr
+
+只有模型，要自己部署
+
+
+
+## paddle-ocr
+
+[AI Studio-帮助文档](https://ai.baidu.com/ai-doc/AISTUDIO/2mh4okm66)
+
+这个模型官方没有提供API, 但是开源了模型。需要自己部署
+
+### 远程部署
+
+<img src="image-20251119130105581.png" alt="image-20251119130105581" style="zoom:33%;" />
+
+这个部署的模型使用教程和官方的教程好像有出入?
+
+<img src="image-20251119130205092.png" alt="image-20251119130205092" style="zoom:50%;" />
+
+测试了一下`API_URL`和`TOKEN`对不上
+
+
 
 ## Textin
 
@@ -865,7 +1102,7 @@ def elements_to_markdown(elements, md_path="output.md", image_dir="images"):
 
 - ✔ 3. **自托管服务器 / unstructured-ingest / pipeline API 调用**
 支持的工作流节点
- 
+
 - `Source` ：source节点，指定了文档源(可以是`File`, `三方数据源(比如企业数据库)`)
 - `Destination`:  target节点，指定了文档输出源(可以是各种三方服务, 也可以是`企业数据库, 向量数据库`)
 - `Partitioner` :  对文档进行语义分割，元素拆解

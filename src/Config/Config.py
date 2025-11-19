@@ -16,4 +16,5 @@ class Config :
         
         self.light_api_key = os.environ['LIGHT_API_KEY']
         
+        
 config = Config()
