@@ -368,6 +368,10 @@ def main():
 
 ![image-20251123181244860](E:\Book\实用API\PDFToMd\image-20251123181244860.png)
 
+QPS收费
+
+​	<img src="E:\Book\实用API\PDFToMd\image-20251123182414643.png" alt="image-20251123182414643" style="zoom:33%;" />
+
 具体价格：
 
 https://console.bce.baidu.com/ai-engine/old/#/ai/ocr/purchaseAll/index~apiId=27&type=sharePackage
