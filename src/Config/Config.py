@@ -16,5 +16,7 @@ class Config :
         
         self.light_api_key = os.environ['LIGHT_API_KEY']
         
+        self.baidu_api_key = os.environ['BAIDU_API_KEY']
+        self.baidu_secret_key = os.environ['BAIDU_SECRET_KEY']
         
 config = Config()

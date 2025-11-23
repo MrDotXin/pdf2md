@@ -13,6 +13,9 @@
   - [小红书 dots.ocr](#小红书-dotsocr)
   - [paddle-ocr](#paddle-ocr)
     - [远程部署](#远程部署)
+    - [百度智能云](#百度智能云)
+    - [输入](#输入-2)
+    - [输出](#输出-2)
   - [Textin](#textin)
     - [计费方式](#计费方式)
     - [图片元素](#图片元素)
@@ -22,48 +25,48 @@
     - [计费方式](#计费方式-1)
     - [安装Python SDK](#安装python-sdk)
     - [使用](#使用-2)
-      - [输入](#输入-2)
-      - [输出](#输出-2)
+      - [输入](#输入-3)
+      - [输出](#输出-3)
     - [不足](#不足)
   - [mistral-ocr(开源社区工具, 对PDF还原度较高)](#mistral-ocr开源社区工具-对pdf还原度较高)
     - [功能特点](#功能特点)
     - [Mistral AI OCR定价](#mistral-ai-ocr定价)
     - [使用](#使用-3)
-      - [输入](#输入-3)
-      - [输出](#输出-3)
+      - [输入](#输入-4)
+      - [输出](#输出-4)
   - [MinerU API](#mineru-api)
     - [limits](#limits)
     - [使用](#使用-4)
       - [首先提交任务](#首先提交任务)
       - [轮询状态](#轮询状态)
     - [获取结果](#获取结果)
-      - [输入](#输入-4)
-      - [输出](#输出-4)
+      - [输入](#输入-5)
+      - [输出](#输出-5)
   - [Marker](#marker)
     - [支持本地部署](#支持本地部署)
     - [使用](#使用-5)
-    - [输入](#输入-5)
-    - [输出](#输出-5)
+    - [输入](#输入-6)
+    - [输出](#输出-6)
     - [本地部署](#本地部署)
   - [Docling(本地)](#docling本地)
   - [Doc2x](#doc2x)
     - [定价](#定价)
     - [使用](#使用-6)
-      - [输入](#输入-6)
-      - [输出](#输出-6)
+      - [输入](#输入-7)
+      - [输出](#输出-7)
     - [不足](#不足-1)
   - [Lightpdf](#lightpdf)
     - [定价](#定价-1)
     - [使用](#使用-7)
-    - [输入](#输入-7)
     - [输入](#输入-8)
+    - [输入](#输入-9)
     - [不足](#不足-2)
   - [PyMuPDF(本地)](#pymupdf本地)
   - [Pandoc](#pandoc)
   - [mathpix](#mathpix)
     - [使用](#使用-8)
-    - [输入](#输入-9)
-    - [输出](#输出-7)
+    - [输入](#输入-10)
+    - [输出](#输出-8)
   - [Unstructured.io](#unstructuredio)
     - [SDK 对文档进行按元素拆解获取结果(sync)](#sdk-对文档进行按元素拆解获取结果sync)
     - [支持自定义工作流](#支持自定义工作流)
@@ -286,17 +289,113 @@ def query() :
 
 这个模型官方没有提供API, 但是开源了模型。需要自己部署
 
+
 ### 远程部署
 
 <img src="image-20251119130105581.png" alt="image-20251119130105581" style="zoom:33%;" />
 
-这个部署的模型使用教程和官方的教程好像有出入?
 
 <img src="image-20251119130205092.png" alt="image-20251119130205092" style="zoom:50%;" />
 
-测试了一下`API_URL`和`TOKEN`对不上
+
+### 百度智能云
+
+百度智能云提供了Paddle的API，调研方式如下
+```pyhon
+def main():
+            
+        url = "https://aip.baidubce.com/rest/2.0/brain/online/v2/paddle-vl-parser/task?access_token=" + get_access_token()
 
 
+        # Load PDF document
+        document = ap.Document("E:\\Book\\实用API\\PDFToMd\\ReAct.pdf")
+
+        # Save PDF into memory stream
+        memory_stream = io.BytesIO()
+        document.save(memory_stream)
+
+        # Convert memory stream to byte array
+        byte_array = memory_stream.getvalue()
+
+        # Convert to Base64 string
+        base64_result = base64.b64encode(byte_array).decode("utf-8")
+
+        payload=f'file_data={urllib.parse.quote(base64_result)}&file_name=ReAct.pdf&analysis_chart=False'
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json'
+        }
+        
+        response = requests.request("POST", url, headers=headers, data=payload.encode("utf-8"))
+        
+        response.encoding = "utf-8"
+        print(response.json())
+        print(response.json()['result']['task_id'])
+        task_id = response.json()['result']['task_id']
+        return task_id
+
+    def get_access_token():
+        """
+        使用 AK，SK 生成鉴权签名（Access Token）
+        :return: access_token，或是None(如果错误)
+        """
+        url = "https://aip.baidubce.com/oauth/2.0/token"
+        params = {"grant_type": "client_credentials", "client_id": API_KEY, "client_secret": SECRET_KEY}
+        return str(requests.post(url, params=params).json().get("access_token"))
+
+    main()
+```
+
+使用task_id来检查完成情况
+```python
+        url = "https://aip.baidubce.com/rest/2.0/brain/online/v2/paddle-vl-parser/task/query?access_token=" + get_access_token()
+        
+        payload=f'task_id={taskid}'
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json'
+        }
+        
+        response = requests.request("POST", url, headers=headers, data=payload.encode("utf-8"))
+        
+        response.encoding = "utf-8"
+        print(response.text)
+```
+
+### 计费
+
+下面是按量付费举例
+
+![image-20251123181244860](E:\Book\实用API\PDFToMd\image-20251123181244860.png)
+
+具体价格：
+
+https://console.bce.baidu.com/ai-engine/old/#/ai/ocr/purchaseAll/index~apiId=27&type=sharePackage
+
+### 输入
+
+需要输入文档的Base64编码, 默认图片解析
+
+### 输出
+
+解析结果文档
+
+```
+{
+    "log_id": "12342220106459938747964590412276",
+    "error_code": 0,
+    "error_msg": "",
+    "result": {
+        "task_id": "task-K3BI5Cf20r6NwXhdbMEvbEg4p11SDjlR",
+        "status": "success",
+        "task_error": null,
+        "parse_result_url": "https://xmind",
+        "markdown_url": "https://xmind-"
+    }
+}
+```
+
+> 图片解析会直接以URL的形式在markdown_url中出现
 
 ## Textin
 
