@@ -14,6 +14,7 @@
   - [paddle-ocr](#paddle-ocr)
     - [远程部署](#远程部署)
     - [百度智能云](#百度智能云)
+    - [计费](#计费-1)
     - [输入](#输入-2)
     - [输出](#输出-2)
   - [Textin](#textin)
@@ -301,7 +302,7 @@ def query() :
 ### 百度智能云
 
 百度智能云提供了Paddle的API，调研方式如下
-```pyhon
+```python
 def main():
             
         url = "https://aip.baidubce.com/rest/2.0/brain/online/v2/paddle-vl-parser/task?access_token=" + get_access_token()
@@ -366,11 +367,11 @@ def main():
 
 下面是按量付费举例
 
-![image-20251123181244860](E:\Book\实用API\PDFToMd\image-20251123181244860.png)
+![image-20251123181244860](image-20251123181244860.png)
 
 QPS收费
 
-​	<img src="E:\Book\实用API\PDFToMd\image-20251123182414643.png" alt="image-20251123182414643" style="zoom:33%;" />
+​	<img src="image-20251123182414643.png" alt="image-20251123182414643" style="zoom:33%;" />
 
 具体价格：
 
