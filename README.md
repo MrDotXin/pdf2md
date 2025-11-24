@@ -1,6 +1,12 @@
 # PDF 转化Markdow 工具方案调研情况
 
 - [PDF 转化Markdow 工具方案调研情况](#pdf-转化markdow-工具方案调研情况)
+  - [Textin \& PaddleOCR比对](#textin--paddleocr比对)
+    - [Textin价格](#textin价格)
+    - [Textin 并发情况](#textin-并发情况)
+    - [PaddleOCR-VL解析价格](#paddleocr-vl解析价格)
+    - [预付费资源包](#预付费资源包)
+    - [并发](#并发)
   - [腾讯云文档解析](#腾讯云文档解析)
     - [使用](#使用)
     - [输入](#输入)
