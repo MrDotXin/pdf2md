@@ -1,40 +1,29 @@
 import json
 import requests
-import re
-import base64
-from typing import Tuple
+from typing import Dict, Optional
+from dataclasses import dataclass
 from src.Config import config
-
+import os 
 
 class OCRClient:
     def __init__(self, app_id: str, secret_code: str):
         self.app_id = app_id
         self.secret_code = secret_code
-        self.content_type = {
-            'file': "application/octet-stream",
-            'url': "text/plain"
-        }
-    
-    
-    def getContentFromType(self, url : str, url_type : str) -> bytes :
-        if url_type == 'file':
-            with open(url, 'rb') as f:
-                result = f.read()
-                return result
-        else :
-            return url
-    
-    def recognize(self, url: str, url_type : str, options: dict) -> str:
+
+    def recognize(self, file_content: bytes, options: dict) -> str:
         # 构建请求参数
         params = {}
         for key, value in options.items():
-            params[key] = str(value)    
+            params[key] = str(value)
 
         # 设置请求头
         headers = {
             "x-ti-app-id": self.app_id,
             "x-ti-secret-code": self.secret_code,
-            "Content-Type": self.content_type[url_type]
+            # 方式一：读取本地文件
+            "Content-Type": "application/octet-stream"
+            # 方式二：使用URL方式
+            # "Content-Type": "text/plain"
         }
 
         # 发送请求
@@ -42,73 +31,55 @@ class OCRClient:
             f"https://api.textin.com/ai/service/v1/pdf_to_markdown",
             params=params,
             headers=headers,
-            data=self.getContentFromType(url, url_type)
+            data=file_content
         )
 
         # 检查响应状态
         response.raise_for_status()
         return response.text
 
-# 提取所有表格的markdown形式
-def get_tables_md(json_result : str) -> str :
-    json_response = json.loads(json_result)
-    if "result" in json_response and "markdown" in json_response["result"]:
-        markdown_content = json_response["result"]["markdown"]
-        tables = re.findall(r'(?:\|.*\n)+', markdown_content)
-        tables_md = '\n'.join(tables)        
-
-# 提取所有表格的json形式  
-def get_tables_json(json_result : str) -> str :
-    tables_json = []
-    json_response = json.loads(json_result)
-    if "result" in json_response and 'pages' in json_response["result"]:
-        for page in json_response["result"]["pages"]:
-            for block in page.get("structured", []):
-                if block.get("type") == "table":
-                    tables_json.append(block)
-
-    return tables_json
-
-# 从返回的Json结果提取所有表格以excel 二进制数据的形式  
-def get_tables_by_excel_bytes(json_result : str) -> bytes: 
-    json_response = json.loads(json_result)
-    if "result" in json_response and "excel_base64" in json_response["result"]:
-        excel_base64 = json_response["result"]["excel_base64"]
-        excel_bytes = base64.b64decode(excel_base64)
-        return excel_bytes
-
-# 从返回的Json结果获取目录树json格式
-def get_catalog_tree(json_result : str) :
-    json_response = json.loads(response)
-    if "result" in json_response and "catalog" in json_response["result"]:
-        catalog = json_response["result"]["catalog"]
-        return catalog
-
-# 从返回的Json结果获取markdown全文
-def get_markdown(json_result : str) -> str:
-    json_response = json.loads(json_result)
-    if "result" in json_response and "markdown" in json_response["result"]:
-        markdown_content = json_response["result"]["markdown"]
-        return markdown_content
-
-# 获取返回的json字符串
-def parse(url : str, url_type : str, params : dict) -> Tuple[str, str]:
+def convert(target_pdf : str, target_dir : str):
+    # 创建客户端实例
     client = OCRClient(config.textin_app_id, config.textin_secret_key)
-    
-    options = dict( # 传入的配置
-        dpi=144,
-        get_image="objects",
-        markdown_details=1,
-        page_count=3,
-        parse_mode="auto",
-        table_flavor="html"
-    )
-    
-    options.update(params)
-    
-    try:
-        response = client.recognize(url, url_type, options)
 
-        return response
+    # 读取图片文件
+    # 方式一：读取本地文件
+    with open(target_pdf, "rb") as f:
+        file_content = f.read()
+
+    # 设置转换选项
+    options = dict(
+        apply_document_tree=1,
+        apply_image_analysis=0,
+        apply_merge=1,
+        catalog_details=1,
+        dpi=144,
+        formula_level=1,
+        get_excel=1,
+        get_image="both",
+        markdown_details=1,
+        page_count=1000,
+        page_details=1,
+        page_start=1,
+        paratext_mode="annotation",
+        parse_mode="scan",
+        raw_ocr=0,
+        table_flavor="html",
+    )
+
+    try:
+        response = client.recognize(file_content, options)
+        
+        # 保存完整的JSON响应到result.json文件
+        with open("result.json", "w", encoding="utf-8") as f:
+            f.write(response)
+        
+        # 解析JSON响应以提取markdown内容
+        json_response = json.loads(response)
+        if "result" in json_response and "markdown" in json_response["result"]:
+            markdown_content = json_response["result"]["markdown"]
+            with open(os.path.join(target_dir, "result.md"), "w", encoding="utf-8") as f:
+                f.write(markdown_content)
+    
     except Exception as e:
         print(f"Error: {e}")

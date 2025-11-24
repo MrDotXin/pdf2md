@@ -68,7 +68,7 @@ def fetch(taskid : str) :
         response = requests.request("POST", url, headers=headers, data=payload.encode("utf-8"))
         
         response.encoding = "utf-8"
-        print(response.text)
+        print(response.json())
         
 
     def get_access_token():
