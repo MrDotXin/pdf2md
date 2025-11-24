@@ -31,7 +31,7 @@ def run() :
     files = lisFilesFromPath(benchmark)
     
     for file in tqdm.tqdm(files) :
-        target_dir = os.path.join(save_dir, file['raw_file_name'])
+        target_dir = save_dir
         if not os.path.exists(target_dir) :
             os.makedirs(target_dir)
         textin.convert(file['file_path'], target_dir)

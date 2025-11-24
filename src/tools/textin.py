@@ -64,7 +64,7 @@ def convert(target_pdf : str, target_dir : str):
         paratext_mode="annotation",
         parse_mode="scan",
         raw_ocr=0,
-        table_flavor="html",
+        table_flavor="md",
     )
 
     try:
